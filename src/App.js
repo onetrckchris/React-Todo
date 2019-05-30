@@ -1,64 +1,80 @@
 import React from 'react';
-import TodoList from './components/TodoComponents/TodoList';
-import TodoForm from './components/TodoComponents/TodoForm';
+import uuid from 'uuid';
 
-const todosArray = [
-  {
-    task: "Organize Garage",
-    id: 1528817077286,
-    completed: false
-  },
-  {
-    task: "Bake Cookies",
-    id: 1528817084358,
-    completed: false
-  },
-  {
-    task: "DO THE THING",
-    id: 15288170,
-    completed: false
-  },
-  {
-    task: "Do the other thing",
-    id: 152858,
-    completed: false
-  },
-  {
-    task: "Do the other OTHER thing",
-    id: 152859,
-    completed: false
-  }
-];
+import TodoList from './components/todo_components/TodoList';
+import TodoForm from './components/todo_components/TodoForm';
+import TodoCompleted from './components/todo_components/TodoCompleted';
+
+import './app.css';
 
 class App extends React.Component {
-  // you will need a place to store your state in this component.
-  // design `App` to be the parent component of your application.
-  // this component is going to take care of state, and any change handlers you need to work with your state
-  constructor() {
-    super();
-    this.state = {
-      todosArray,
-      todoItem: ''
-    };
+  state = {
+    todoList: [
+      {
+        id: uuid.v4(),
+        title: 'Take out the trash',
+        completed: false
+      },
+      {
+        id: uuid.v4(),
+        title: 'Get to Diamond in LoL',
+        completed: false
+      },
+      {
+        id: uuid.v4(),
+        title: 'Master React',
+        completed: false
+      }
+    ]
+  }
+  
+  markComplete = (id) => {
+    this.setState({ todoList: this.state.todoList.map(todo => {
+      if(todo.id === id) {
+        todo.completed = !todo.completed;
+      }
+
+      return todo;
+    })})
   }
 
-  updateTodoItem = event => {
-    this.setState({todoItem: event.target.value});
+  deleteTodo = (id) => {
+    // These three dots are called the "spread operator" and they basically copy everything 
+    // that's passed immediately after it. In this case we'll be copying this.state.todoList
+    // and then filtering it to return only the todo items that don't have the same id as the
+    // id that we're passed from the TodoList component.
+    this.setState({ todoList: [...this.state.todoList.filter(todo => todo.id !== id)] })
   }
 
-  submitTodoItem = event => {
-    event.preventDefault();
-    console.log(event)
+  deleteCompleted = () => {
+    const newTodoList = this.state.todoList.filter(todo => todo.completed === false);
+    console.log(newTodoList)
+    this.setState({ todoList: newTodoList });
+  }
+
+  addTodo = (value) => {
+    const newTodo = {
+      id: uuid.v4(),
+      title: value,
+      completed: false
+    }
+    this.setState({ todoList: [...this.state.todoList, newTodo] })
   }
 
   render() {
     return (
       <div>
-        <h1>Todo List: MVP</h1>
-        <TodoList todosArray={this.state.todosArray} />
-        <TodoForm 
-          updateTodoItem={this.updateTodoItem} 
-          submitTodoItem={this.submitTodoItem} />
+        <TodoForm addTodo={this.addTodo} />
+        <TodoList 
+          todoList={this.state.todoList} 
+          markComplete={this.markComplete} 
+          deleteTodo={this.deleteTodo} 
+        />
+        <TodoCompleted 
+          todoList={this.state.todoList} 
+          deleteTodo={this.deleteTodo} 
+          deleteCompleted={this.deleteCompleted}
+        />
       </div>
     );
   }
